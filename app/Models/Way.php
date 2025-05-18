@@ -12,46 +12,37 @@ class Way extends Model
     protected $fillable = [
         'name',
         'horizontal',
+        'way_type',
         'vertical',
         'address',
-        'way_add',
-        'admin_idadmin',
         'languages_idlanguages',
-        'socials_idsocials',
-        'places_idplaces',  
-        'services_idservices',
-        'links_idlinks',
-        'cities_idcities'
-    ];
-    public function users() {
-        return $this->hasMany(User::class, 'way_idway');
-    }
+        'categories_idcategories',
+        'cities_idcities',
+        'places_idplaces',
 
-    public function language() {
+    ];
+    public function language()
+    {
         return $this->belongsTo(Language::class, 'languages_idlanguages');
     }
 
-    public function social() {
-        return $this->belongsTo(Social::class, 'socials_idsocials');
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'categories_idcategories');
     }
 
-    public function place() {
-        return $this->belongsTo(Place::class, 'places_idplaces');
-    }
-
-    public function service() {
-        return $this->belongsTo(Service::class, 'services_idservices');
-    }
-
-    public function link() {
-        return $this->belongsTo(Link::class, 'links_idlinks');
-    }
-
-    public function city() {
+    public function city()
+    {
         return $this->belongsTo(City::class, 'cities_idcities');
     }
 
-    public function admin() {
-        return $this->belongsTo(Admin::class, 'admin_idadmin');
+    public function place()
+    {
+        return $this->belongsTo(Place::class, 'places_idplaces');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'way_idway');
     }
 }

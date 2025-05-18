@@ -8,10 +8,9 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('socials', function (Blueprint $table) {
             $table->id('idsocials');
-            $table->foreignId('admin_idadmin')->constrained('admins', 'idadmin');
-            $table->foreignId('languages_idlanguages')->constrained('languages', 'idlanguages');
             $table->string('social_name', 45);
             $table->string('social_address', 90);
+            $table->foreignId('languages_idlanguages')->constrained('languages', 'idlanguages');
             $table->timestamps();
         });   
     }

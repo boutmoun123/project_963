@@ -10,14 +10,18 @@ class WayResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-                    'id' => $this->idway,
-                    'name' => $this->name, // حسب الجدول
-                    'city' => new CityResource($this->city), 
-                    'horizontal'=>$this->horizontal,
-                    'vertical'=>$this->vertical,
-                    'address'=>$this->address,
-                    'way_add'=>$this->way_add,
-                    'created_at' => $this->created_at,
+            'id' => $this->idway,
+            'name' => $this->name,
+            'way_type' => $this->way_type,
+            'horizontal' => $this->horizontal,
+            'vertical' => $this->vertical,
+            'address' => $this->address,
+            'languages_idlanguages' => $this->languages_idlanguages,
+            'categories_idcategories' => $this->categories_idcategories,
+            'cities_idcities' => $this->cities_idcities,
+            'places_idplaces' => $this->places_idplaces,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

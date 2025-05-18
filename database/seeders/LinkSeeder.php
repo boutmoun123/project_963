@@ -12,6 +12,7 @@ class LinkSeeder extends Seeder
         Link::create([
             'link_name' => 'Sample Link',
             'link_http' => 'https://example.com',
+            'link_type' => 1,
             'languages_idlanguages' => 1,
             'admin_idadmin' => 1,
             'media_idmedia' => 1,

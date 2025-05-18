@@ -1,88 +1,85 @@
 <?php
 
-
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Link;
 use App\Http\Resources\LinkResource;
 use App\Http\Requests\LinkRequest;
-use App\Models\Social;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class LinkController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return LinkResource::collection(Link::all());
+        try {
+            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
+            $page = $request->input('page', 1); // Default to page 1 if not specified
+
+            $links = Link::paginate($perPage, ['*'], 'page', $page);
+            \Log::info('All links:', $links->toArray());
+            return LinkResource::collection($links);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching links: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error fetching links',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
- 
+
     public function store(LinkRequest $request)
     {
-        \Log::info('Raw request data:', $request->all());
-        
-        // Get all request data
-        $data = $request->all();
-        
-        // Validate required fields
-        if (!isset($data['languages_idlanguages'])) {
-            return response()->json([
-                'message' => 'Language ID is required',
-                'errors' => [
-                    'languages_idlanguages' => ['The language ID field is required.']
-                ]
-            ], 422);
-        }
-
-        if (!isset($data['admin_idadmin'])) {
-            return response()->json([
-                'message' => 'Admin ID is required',
-                'errors' => [
-                    'admin_idadmin' => ['The admin ID field is required.']
-                ]
-            ], 422);
-        }
-
-        if (!isset($data['media_idmedia'])) {
-            return response()->json([
-                'message' => 'Media ID is required',
-                'errors' => [
-                    'media_idmedia' => ['The media ID field is required.']
-                ]
-            ], 422);
-        }
-
         try {
-            // Create social record if it doesn't exist
-            $social = Social::firstOrCreate(
-                [
-                    'social_name' => 'Default Social',
-                    'social_address' => 'https://example.com/social',
-                    'languages_idlanguages' => $data['languages_idlanguages'],
-                    'admin_idadmin' => $data['admin_idadmin']
-                ]
-            );
-
-            // Create link record with explicit field assignment
-            $link = new Link();
-            $link->link_name = $data['link_name'];
-            $link->link_http = $data['link_http'];
-            $link->languages_idlanguages = $data['languages_idlanguages'];
-            $link->admin_idadmin = $data['admin_idadmin'];
-            $link->media_idmedia = $data['media_idmedia'];
-            $link->socials_idsocials = $social->idsocials;
-            $link->save();
-
-            return new LinkResource($link);
-        } catch (\Exception $e) {
-            \Log::error('Error creating link:', [
-                'error' => $e->getMessage(),
-                'data' => $data
-            ]);
+            \Log::info('Raw request data:', $request->all());
+            $validated = $request->validated();
+            \Log::info('Validated data:', $validated);
             
+            // Debug the validated data
+            if (!isset($validated['link_type'])) {
+                \Log::error('link_type is missing from validated data');
+                return response()->json([
+                    'message' => 'link_type is missing from validated data',
+                    'validated_data' => $validated
+                ], 422);
+            }
+            $link = Link::create($validated);
+            \Log::info('Created link:', $link->toArray());
+            
+            // Debug the created model
+            if (!isset($link->link_type)) {
+                \Log::error('link_type is missing from created model');
+                return response()->json([
+                    'message' => 'link_type is missing from created model',
+                    'model_data' => $link->toArray()
+                ], 422);
+            }
+            
+            // Remove loading of star and service
+            // $resource = new LinkResource($link->load(['star', 'service']));
+            // $response = $resource->toArray($request);
+            
+            $resource = new LinkResource($link);
+            $response = $resource->toArray($request);
+            
+            // Debug the resource
+            if (!isset($response['link_type'])) {
+                \Log::error('link_type is missing from resource');
+                return response()->json([
+                    'message' => 'link_type is missing from resource',
+                    'resource_data' => $response
+                ], 422);
+            }
+            
+            return $resource;
+        } catch (\Exception $e) {
+            \Log::error('Error creating link: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json([
-                'message' => 'Error creating link record',
-                'error' => $e->getMessage()
+                'message' => 'Error creating link',
+                'error' => $e->getMessage(),
+                'request_data' => $request->all()
             ], 500);
         }
     }
@@ -96,7 +93,12 @@ class LinkController extends Controller
     public function update(LinkRequest $request, $id)
     {
         $link = Link::findOrFail($id);
-        $link->update($request->validated());
+        $validated = $request->validated();
+        // Remove star and service from update
+        // $validated['stars_idstars'] = $validated['star'] ?? null;
+        // $validated['services_idservices'] = $validated['service'] ?? null;
+        // unset($validated['star'], $validated['service']);
+        $link->update($validated);
         return new LinkResource($link);
     }
 
@@ -105,5 +107,31 @@ class LinkController extends Controller
         $link = Link::findOrFail($id);
         $link->delete();
         return response()->json(['message' => 'Link deleted successfully']);
+    }
+
+    public function filterByPlaceCityCategoryAndLanguage(Request $request, $placeId, $cityId, $categoryId, $languageId)
+    {
+        try {
+            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
+            $page = $request->input('page', 1); // Default to page 1 if not specified
+
+            $links = Link::where('places_idplaces', $placeId)
+                        ->where('cities_idcities', $cityId)
+                        ->where('categories_idcategories', $categoryId)
+                        ->where('languages_idlanguages', $languageId)
+                        ->with(['place', 'city', 'category', 'language'])
+                        ->paginate($perPage, ['*'], 'page', $page);
+            
+            return LinkResource::collection($links);
+        } catch (\Exception $e) {
+            Log::error('Error filtering links', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Error filtering links',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

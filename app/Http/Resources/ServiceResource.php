@@ -11,19 +11,26 @@ class ServiceResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
-                'id' => $this->idservices,
-                'ser_name' => $this->ser_name, 
-                'languages_idlanguages' => $this->languages_idlanguages,
-                'admin_idadmin' => $this->admin_idadmin,
-                'media_idmedia' => $this->media_idmedia,
-                'links_idlinks' => $this->links_idlinks,
-                'places_idplaces' => $this->places_idplaces,
-                'cities_idcities' => $this->cities_idcities,
-                'category' => new CategoryResource($this->category),
-                'created_at' => $this->created_at, 
-                'updated_at' => $this->updated_at,
+        \Log::info('Service resource data:', [
+            'model' => $this->resource->toArray(),
+            'ser_type' => $this->ser_type
+        ]);
+
+        $data = [
+            'id' => $this->idservices,
+            'ser_name' => $this->ser_name, 
+            'ser_type' => $this->ser_type,
+            'ser_photo' => $this->ser_photo,
+            'description' => $this->description,
+        
+            'languages_idlanguages' => $this->languages_idlanguages,
+            'categories_idcategories' => $this->categories_idcategories,
+            'cities_idcities' => $this->cities_idcities,
+            'created_at' => $this->created_at, 
+            'updated_at' => $this->updated_at,
         ];
 
-}
+        \Log::info('Service resource response:', $data);
+        return $data;
+    }
 }

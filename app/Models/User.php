@@ -11,14 +11,10 @@ class User extends Model
     use HasApiTokens;
     protected $primaryKey = 'iduser';
     protected $fillable = [
-        'admin_idadmin', 'languages_idlanguages', 'socials_idsocials', 'way_idway',
+        'languages_idlanguages', 'socials_idsocials', 'way_idway',
         'places_idplaces', 'media_idmedia', 'services_idservices',
         'categories_idcategories', 'links_idlinks', 'cities_idcities'
     ];
-
-    public function admin() {
-        return $this->belongsTo(Admin::class, 'admin_idadmin');
-    }
 
     public function language() {
         return $this->belongsTo(Language::class, 'languages_idlanguages');

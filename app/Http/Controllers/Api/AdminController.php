@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminRequest;
+use App\Http\Requests\AdminLoginRequest;
 use App\Http\Resources\AdminResource;
 use App\Models\Admin;
 use Illuminate\Http\Request;
@@ -15,58 +16,144 @@ class AdminController extends Controller
 {
     public function index()
     {
-        // Return all admins using Resource to transform the data
         return AdminResource::collection(Admin::all());
     }
 
     public function store(AdminRequest $request)
     {
-        // Validate and create a new Admin
-        $admin = Admin::create($request->validated());
-
-        // Return the response using AdminResource
-        return new AdminResource($admin);
+        try {
+            $validated = $request->validated();
+            $admin = Admin::create($validated);
+            return new AdminResource($admin);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error creating admin',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show($id)
     {
         $admin = Admin::findOrFail($id);
-
         return new AdminResource($admin);
     }
 
-    public function update(AdminRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        $admin = Admin::findOrFail($id);
-        $admin->update($request->validated());
+        try {
+            $admin = Admin::findOrFail($id);
+            
+            // Check if trying to update boutmoun
+            if ($admin->name === 'boutmoun') {
+                return response()->json([
+                    'message' => 'Cannot update the main admin account'
+                ], 403);
+            }
+            
+            // Validate the request
+            $validated = $request->validate([
+                'name' => 'sometimes|string|max:255',
+                'password' => 'sometimes|string|min:8'
+            ]);
 
-        return new AdminResource($admin);
+            // Update the admin
+            $admin->update($validated);
+            return new AdminResource($admin);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating admin',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
     {
-        $admin = Admin::findOrFail($id);
-        $admin->delete();
-
-        return response()->json(['message' => 'Admin deleted successfully']);
+        try {
+            $admin = Admin::findOrFail($id);
+            
+            // Check if the admin is boutmoun
+            if ($admin->name === 'boutmoun') {
+                return response()->json([
+                    'message' => 'Cannot delete the main admin account'
+                ], 403);
+            }
+            
+            $admin->delete();
+            return response()->json(['message' => 'Admin deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting admin',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function login(Request $request)
+    public function login(AdminLoginRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string',
-            'password' => 'required|string'
-        ]);
+        try {
+            \Log::info('Login attempt:', [
+                'name' => $request->name,
+                'password_length' => strlen($request->password)
+            ]);
 
-        $admin = Admin::where('name', $request->name)->first();
+            $admin = Admin::where('name', $request->name)->first();
 
-        if (!$admin || !$admin->verifyPassword($request->password)) {
+            if (!$admin) {
+                \Log::warning('Admin not found:', ['name' => $request->name]);
+                return response()->json([
+                    'message' => 'Invalid credentials'
+                ], 401);
+            }
+
+            \Log::info('Admin found:', [
+                'id' => $admin->idadmin,
+                'name' => $admin->name
+            ]);
+
+            if (!Hash::check($request->password, $admin->password)) {
+                \Log::warning('Invalid password for admin:', ['name' => $request->name]);
+                return response()->json([
+                    'message' => 'Invalid credentials'
+                ], 401);
+            }
+
+            // Generate token
+            $token = $admin->createToken('admin-token')->plainTextToken;
+            \Log::info('Login successful:', [
+                'admin_id' => $admin->idadmin,
+                'token_generated' => true
+            ]);
+
             return response()->json([
-                'message' => 'Invalid credentials'
-            ], 401);
+                'admin' => new AdminResource($admin),
+                'token' => $token
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Login error:', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Login failed',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        return new AdminResource($admin);
+    public function logout(Request $request)
+    {
+        try {
+            $request->user()->currentAccessToken()->delete();
+            return response()->json(['message' => 'Logged out successfully']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Logout failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function changePassword(Request $request, $id)

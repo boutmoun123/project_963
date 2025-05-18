@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
@@ -13,11 +11,12 @@ class LanguageResource extends JsonResource
     {
         return [
             'id' => $this->idlanguages,
-            'language-package' => $this->language_package,
-            'lang_name' => $this->lang_name,
-            'lang_type' => $this->lang_type,
-            'admin' => new AdminResource($this->admin),
+            'name' => $this->name,
+            'code' => $this->code,
+            'type' => $this->type,
+            'admin_idadmin'=>$this->admin_idadmin,
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at
         ];
     }
 }

@@ -20,11 +20,16 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
-        $validated = $request->validated();
-      //  $validated['password'] = bcrypt($validated['password']);
-
-        $user = User::create($validated);
-        return new UserResource($user);
+        try {
+            $validated = $request->validated();
+            $user = User::create($validated);
+            return new UserResource($user);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error creating user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function show($id)
@@ -32,6 +37,14 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         return new UserResource($user);
     }
+
+    public function update(UserRequest $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $user->update($request->validated());
+        return new UserResource($user);
+    }
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);
@@ -48,7 +61,7 @@ class UserController extends Controller
         ]);
 
         try {
-            Mail::to(config('mail.from.address', 'petersalamoun2004@gmail.com'))->send(new AdminMail(
+            Mail::to(config('mail.from.address', 'sy.963.syria@gmail.com'))->send(new AdminMail(
                 $request->subject,
                 $request->message,
                 'Admin'
@@ -75,7 +88,7 @@ class UserController extends Controller
         ]);
 
         try {
-            Mail::to(config('mail.from.address', 'petersalamoun2004@gmail.com'))->send(new AdminMail(
+            Mail::to(config('mail.from.address', 'sy.963.syria@gmail.com'))->send(new AdminMail(
                 $request->subject,
                 "From: {$request->name} ({$request->email})\n\n{$request->message}",
                 'Admin'

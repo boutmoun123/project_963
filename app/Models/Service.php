@@ -10,47 +10,48 @@ class Service extends Model
     protected $primaryKey = 'idservices';
     protected $fillable = [
         'ser_name',
+        'ser_type',
+        'ser_photo',
+        'description',
         'languages_idlanguages',
-        'admin_idadmin',
-        'media_idmedia',
-        'links_idlinks',
-        'places_idplaces',
-        'cities_idcities',
-        'categories_idcategories'
+        'categories_idcategories',
+        'cities_idcities'
     ];
-    public function users() {
-        return $this->hasMany(User::class, 'services_idservices');
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class, 'languages_idlanguages');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'categories_idcategories');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'cities_idcities');
+    }
+
+    public function users()
+    {
+        return $this->belongsTo(User::class, 'services_idservices');
     }
 
     public function ways() { 
-        return $this->hasMany(Way::class, 'services_idservices');
-    }
-
-    public function language() {
-        return $this->belongsTo(Language::class, 'languages_idlanguages');
+        return $this->belongsTo(Way::class, 'services_idservices');
     }
 
     public function media() {
         return $this->belongsTo(Media::class, 'media_idmedia');
     }
 
-    public function link() {
+    public function links() {
         return $this->belongsTo(Link::class, 'links_idlinks');
     }
 
-    public function place() {
+    public function places() {
         return $this->belongsTo(Place::class, 'places_idplaces');
     }
 
-    public function city() {
-        return $this->belongsTo(City::class, 'cities_idcities');
-    }
-
-    public function admin() {
-        return $this->belongsTo(Admin::class, 'admin_idadmin');
-    }
-
-    public function category() {
-        return $this->belongsTo(Category::class, 'categories_idcategories');
-    }
 }
