@@ -53,4 +53,5 @@ class DeviceLogController extends Controller
     
         return response()->json(['message' => 'All device logs deleted']);
     }
+    
 }
