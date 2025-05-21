@@ -13,8 +13,8 @@ class StarController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
         
         return StarResource::collection(Star::paginate($perPage, ['*'], 'page', $page));
     }
@@ -70,8 +70,8 @@ class StarController extends Controller
     public function filterByCategoryAndLanguage(Request $request, $categoryId, $languageId, $serviceId, $cityId)
     {
         try {
-            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
 
             $stars = Star::where('categories_idcategories', $categoryId)
                          ->where('languages_idlanguages', $languageId)
