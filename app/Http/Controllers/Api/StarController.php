@@ -66,6 +66,7 @@ class StarController extends Controller
         }
     }
 
+    
 
     public function filterByCategoryAndLanguage(Request $request, $categoryId, $languageId, $serviceId, $cityId)
     {
