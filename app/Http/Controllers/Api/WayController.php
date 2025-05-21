@@ -13,8 +13,8 @@ class WayController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
         
         return WayResource::collection(Way::paginate($perPage, ['*'], 'page', $page));
     }
@@ -67,8 +67,8 @@ class WayController extends Controller
     public function filterByPlaceCityCategoryAndLanguage(Request $request, $placeId, $cityId, $categoryId, $languageId)
     {
         try {
-            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
 
             $ways = Way::where('places_idplaces', $placeId)
                       ->where('cities_idcities', $cityId)

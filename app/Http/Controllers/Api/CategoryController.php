@@ -16,8 +16,8 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
         
         return CategoryResource::collection(Category::paginate($perPage, ['*'], 'page', $page));
     }
@@ -173,8 +173,8 @@ class CategoryController extends Controller
 
     public function filterByLanguage(Request $request, $languageId)
     {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page');
+        $page = $request->input('page'); 
 
         $categories = Category::where('languages_idlanguages', $languageId)
                             ->paginate($perPage, ['*'], 'page', $page);

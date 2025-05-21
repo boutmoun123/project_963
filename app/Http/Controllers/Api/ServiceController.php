@@ -15,8 +15,8 @@ class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
         
         return ServiceResource::collection(Service::paginate($perPage, ['*'], 'page', $page));
     }
@@ -186,8 +186,8 @@ public function destroy($id)
     public function filterByCityCategoryAndLanguage(Request $request, $cityId, $categoryId, $languageId)
     {
         try {
-            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
 
             $services = Service::where('cities_idcities', $cityId)
                           ->where('categories_idcategories', $categoryId)

@@ -72,8 +72,8 @@ class PlaceController extends Controller
                 $query->orderBy($request->order_by, $request->order_direction ?? 'asc');
             }
 
-            $perPage = $request->input('per_page', 5); // Default to 10 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); // Default to 10 if not specified
+            $page = $request->input('page'); // Default to page 1 if not specified
 
             $places = $query->paginate($perPage, ['*'], 'page', $page);
             return new PlaceCollection($places);
@@ -304,8 +304,8 @@ class PlaceController extends Controller
 
  public function filterByNullStarAndService(Request $request , $cityId, $categoryId, $languageId )
 {
-    $perPage = $request->input('per_page', 10); // Default to 10 if not specified
-    $page = $request->input('page', 1); // Default to page 1 if not specified
+    $perPage = $request->input('per_page'); // Default to 10 if not specified
+    $page = $request->input('page'); // Default to page 1 if not specified
 
     $places = Place::whereNull('stars_idstars')
                    ->whereNull('services_idservices')
@@ -322,8 +322,8 @@ class PlaceController extends Controller
 public function filterByCityCategoryAndLanguageServiceStar(Request $request, $cityId, $categoryId, $languageId, $serviceId, $starId)
 {
     try {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
 
         $places = Place::where('stars_idstars', $starId)
             ->where('cities_idcities', $cityId)
@@ -350,8 +350,8 @@ public function filterByCityCategoryAndLanguageServiceStar(Request $request, $ci
 public function filterByCityCategoryAndLanguageService(Request $request, $cityId, $categoryId, $languageId, $serviceId)
 {
     try {
-        $perPage = $request->input('per_page', 10); // Default to 10 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
 
         $places = Place::where('cities_idcities', $cityId)
             ->where('categories_idcategories', $categoryId)

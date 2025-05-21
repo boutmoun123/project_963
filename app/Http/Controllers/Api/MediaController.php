@@ -16,8 +16,8 @@ class MediaController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-        $page = $request->input('page', 1); // Default to page 1 if not specified
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
         
         return MediaResource::collection(Media::with(['star', 'service'])->paginate($perPage, ['*'], 'page', $page));
     }
@@ -106,14 +106,11 @@ class MediaController extends Controller
     
                 $file->move($destinationPath, $filename);
     
-                // حفظ رابط الوصول المباشر للملف
                 $validated['med_content'] = asset('media/' . $filename);
             } else {
-                // إذا لم يتم رفع ملف جديد، لا تغير الحقل
                 unset($validated['med_content']);
             }
     
-            // إزالة أي حقول غير موجودة في الجدول
             unset($validated['star'], $validated['service']);
     
             $media->update($validated);
@@ -158,8 +155,8 @@ class MediaController extends Controller
     public function filterByPlaceCityCategoryAndLanguage(Request $request, $placeId, $cityId, $categoryId, $languageId)
     {
         try {
-            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
 
             $media = Media::where('places_idplaces', $placeId)
                          ->where('cities_idcities', $cityId)

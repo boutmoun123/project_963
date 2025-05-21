@@ -17,8 +17,8 @@ class CityController extends Controller
             
             public function index(Request $request)
             {
-                $perPage = $request->input('per_page', 10); // Default to 10 if not specified
-                $page = $request->input('page', 1); // Default to page 1 if not specified
+                $perPage = $request->input('per_page'); 
+                $page = $request->input('page'); 
                 
                 return CityResource::collection(City::paginate($perPage, ['*'], 'page', $page));
             }
@@ -182,8 +182,8 @@ class CityController extends Controller
     public function filterByCategoryAndLanguage(Request $request, $categoryId, $languageId)
     {
         try {
-            $perPage = $request->input('per_page', 10); // Default to 10 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
             
             $cities = City::where('categories_idcategories', $categoryId)
                          ->where('languages_idlanguages', $languageId)

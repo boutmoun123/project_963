@@ -14,8 +14,8 @@ class LinkController extends Controller
     public function index(Request $request)
     {
         try {
-            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
 
             $links = Link::paginate($perPage, ['*'], 'page', $page);
             \Log::info('All links:', $links->toArray());
@@ -112,8 +112,8 @@ class LinkController extends Controller
     public function filterByPlaceCityCategoryAndLanguage(Request $request, $placeId, $cityId, $categoryId, $languageId)
     {
         try {
-            $perPage = $request->input('per_page', 5); // Default to 5 if not specified
-            $page = $request->input('page', 1); // Default to page 1 if not specified
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page'); 
 
             $links = Link::where('places_idplaces', $placeId)
                         ->where('cities_idcities', $cityId)
