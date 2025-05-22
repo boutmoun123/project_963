@@ -12,13 +12,15 @@ class LanguageSeeder extends Seeder
         Language::create([
             'name' => 'English',
             'code' => 'en',
-            'type' => 1
+            'type' => 1,
+            'admin_idadmin'=>1
         ]);
 
         Language::create([
             'name' => 'Arabic',
             'code' => 'ar',
-            'type' => 1
+            'type' => 1,
+            'admin_idadmin'=>1
         ]);
     }
 }
