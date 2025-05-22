@@ -143,6 +143,8 @@ Route::prefix('user')->group(function () {
         Route::get('places/city/{cityId}/category/{categoryId}/language/{languageId}', [PlaceController::class, 'filterByNullStarAndService']);
         Route::get('places/city/{cityId}/category/{categoryId}/language/{languageId}/service/{serviceId}', [PlaceController::class, 'filterByCityCategoryAndLanguageService']);
         Route::get('places/city/{cityId}/category/{categoryId}/language/{languageId}/service/{serviceId}/star/{starId}', [PlaceController::class, 'filterByCityCategoryAndLanguageServiceStar']);
+        Route::get('places/category/{categoryId}/language/{languageId}', [PlaceController::class, 'filterByCategoryAndlanguage']);
+
     });
 
     Route::prefix('service1')->group(function () {

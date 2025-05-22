@@ -16,7 +16,7 @@ protected $fillable = [
     'categories_idcategories',
     'cities_idcities',
     'places_idplaces',
-    'services_idservices'
+    'services_idservices',
 ];
 
      public function language()

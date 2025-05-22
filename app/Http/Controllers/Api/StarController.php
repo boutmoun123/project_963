@@ -48,8 +48,14 @@ class StarController extends Controller
     {
         try {
                 $star = Star::findOrFail($id);
-                
             // Then delete places (as they depend on cities)
+              
+            foreach ($star->places as $place) {
+                $place->links()->delete();  
+                $place->media()->delete(); 
+                $place->ways()->delete();  
+     
+            }
             $star->places()->delete();
             
             $star->delete();

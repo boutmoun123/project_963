@@ -40,6 +40,11 @@ class Way extends Model
     {
         return $this->belongsTo(Place::class, 'places_idplaces');
     }
+    public function service()
+    {
+        return $this->belongsTo(service::class, 'services_idservices');
+    }
+
 
     public function users()
     {

@@ -373,6 +373,32 @@ public function filterByCityCategoryAndLanguageService(Request $request, $cityId
         ], 500);
     }
 }
+
+public function filterByCategoryAndlanguage(Request $request, $categoryId, $languageId)
+{
+    try {
+        $perPage = $request->input('per_page'); 
+        $page = $request->input('page'); 
+
+        $places = Place::where('categories_idcategories', $categoryId)
+            ->where('languages_idlanguages', $languageId)
+            //->where('place_type', '=', 4)
+            ->with(['category', 'language'])
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return PlaceResource::collection($places);
+    } catch (\Exception $e) {
+        \Log::error('Error filtering places', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'message' => 'Error filtering places',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
     public function star()
     {
         return $this->belongsTo(Star::class, 'stars_idstars');

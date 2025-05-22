@@ -156,32 +156,40 @@ public function destroy($id)
                 unlink($filePath);
             }
         }
-            $service->users()->delete();
-            // Then delete ways (as they depend on services)
-            $service->ways()->delete();
-            
-            // Then delete links (as they depend on languages)
-            $service->links()->delete();
-            
-            // Then delete media (as they depend on languages)
-            $service->media()->delete();
-            
-            // Then delete places (as they depend on cities)
-            $service->places()->delete();
-            
-            $service->delete();
-            return response()->json(['message' => 'Service and all related records deleted successfully']);
-        } catch (\Exception $e) {
-            Log::error('Error deleting city', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json([
-                'message' => 'Error deleting city',
-                'error' => $e->getMessage()
-            ], 500);
+
+        // First delete places that reference stars
+        foreach ($service->stars as $star) {
+            $star->places()->delete();
         }
+        
+        // Then delete the stars
+        $service->stars()->delete();
+        foreach ($service->places as $place) {
+            $place->links()->delete();  
+            $place->media()->delete(); 
+            $place->ways()->delete();  
+ 
+        }
+
+        // Then delete other related records
+        $service->users()->delete();
+
+        $service->places()->delete();
+        
+        $service->delete();
+
+        return response()->json(['message' => 'Service and all related records deleted successfully']);
+    } catch (\Exception $e) {
+        Log::error('Error deleting service', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json([
+            'message' => 'Error deleting service',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
     public function filterByCityCategoryAndLanguage(Request $request, $cityId, $categoryId, $languageId)
     {
