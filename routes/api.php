@@ -16,6 +16,26 @@ use App\Http\Controllers\Api\LanguageController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\StarController;
 use App\Http\Controllers\Api\DeviceLogController;
+use Illuminate\Support\Facades\Response;
+
+// Add this new route for serving media files with CORS headers
+Route::get('/media/{filename}', function ($filename) {
+    $path = public_path('media/' . $filename);
+    
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    
+    $file = file_get_contents($path);
+    $type = mime_content_type($path);
+    
+    return Response::make($file, 200)
+        ->header('Content-Type', $type)
+        ->header('Access-Control-Allow-Origin', 'http://localhost:5173')
+        ->header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, Authorization, X-Requested-With')
+        ->header('Access-Control-Allow-Credentials', 'true');
+})->where('filename', '.*');
 
 Route::get('/user', function (Request $request) {
     return $request->user();

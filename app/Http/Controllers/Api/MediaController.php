@@ -43,8 +43,8 @@ class MediaController extends Controller
     
                 $file->move($destinationPath, $filename);
     
-                // حفظ الرابط المباشر للعرض على الويب
-                $validated['med_content'] = asset('media/' . $filename);
+                // Use the new media route
+                $validated['med_content'] = url('api/media/' . $filename);
             }
     
             $media = Media::create($validated);
@@ -77,7 +77,7 @@ class MediaController extends Controller
             $validated = $request->validate([
                 'med_name' => 'sometimes|string|max:255',
                 'med_type' => 'sometimes|integer|max:255',
-                'med_content' => 'sometimes|file',  // تأكد أن نوع الحقل ملف عند رفع صورة/فيديو
+                'med_content' => 'sometimes|file',
                 'places_idplaces' => 'sometimes|integer|exists:places,idplaces',
                 'cities_idcities' => 'sometimes|integer|exists:cities,idcities',
                 'categories_idcategories' => 'sometimes|integer|exists:categories,idcategories',
@@ -106,7 +106,8 @@ class MediaController extends Controller
     
                 $file->move($destinationPath, $filename);
     
-                $validated['med_content'] = asset('media/' . $filename);
+                // Use the new media route
+                $validated['med_content'] = url('api/media/' . $filename);
             } else {
                 unset($validated['med_content']);
             }
@@ -171,6 +172,7 @@ class MediaController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+            
             return response()->json([
                 'message' => 'Error filtering media',
                 'error' => $e->getMessage()
