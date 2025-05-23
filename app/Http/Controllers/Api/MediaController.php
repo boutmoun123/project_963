@@ -59,8 +59,7 @@ class MediaController extends Controller
                 'message' => 'Error creating media',
                 'error' => $e->getMessage()
             ], 500);
-        }
-    }
+        }}
     
     public function show($id)
     {
@@ -130,7 +129,7 @@ class MediaController extends Controller
             ], 500);
         }
     }
-    
+   
     public function destroy($id)
     {
         try {
