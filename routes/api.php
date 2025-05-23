@@ -46,7 +46,6 @@ Route::get('/', function(){
 });
 
 // Contact admin route
-Route::post('contact-admin', [ContactController::class, 'sendMessage']);
 
 // Admin Routes
 Route::prefix('admin')->group(function () {
@@ -198,6 +197,8 @@ Route::prefix('user')->group(function () {
     Route::prefix('device')->group(function () {
         Route::post('store', [DeviceLogController::class, 'store']);
     });
+    Route::post('contact-admin', [ContactController::class, 'sendMessage']);
+
 });
 
 
