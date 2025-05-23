@@ -192,7 +192,7 @@ Route::prefix('user')->group(function () {
     Route::prefix('star1')->group(function () {
         Route::get('star', [StarController::class, 'index']);
         Route::get('star/{star}', [StarController::class, 'show']);
-        Route::get('star/service/{serviceId}/city/{cityId}/category/{categoryId}/language/{languageId}', [StarController::class, 'filterByCategoryAndLanguage']);
+        Route::get('star/category/{categoryId}/language/{languageId}/service/{serviceId}/city/{cityId}', [StarController::class, 'filterByCategoryAndLanguage']);
     });
 
     Route::prefix('device')->group(function () {

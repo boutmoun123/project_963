@@ -11,7 +11,6 @@ class DeviceLogController extends Controller
 
     public function store(Request $request)
     {
-        // 1. تحقق من صحة البيانات المرسلة
         $data = $request->validate([
             'device_name'  => 'nullable|string|max:255',
             'platform'     => 'nullable|in:iOS,Android',
@@ -29,12 +28,45 @@ class DeviceLogController extends Controller
         ], 201);
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $logs = Device::all();
-        return response()->json($logs);
+        try {
+            $perPage = $request->input('per_page'); 
+            $page = $request->input('page');         
+    
+            $devices = Device::paginate($perPage, ['*'], 'page', $page);
+    
+            \Log::info('Fetched paginated devices', [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => $devices->total(),
+                'count' => $devices->count()
+            ]);
+    
+            return response()->json([
+                'message' => 'Devices fetched successfully',
+                'data' => $devices->items(),
+                'meta' => [
+                    'current_page' => $devices->currentPage(),
+                    'last_page' => $devices->lastPage(),
+                    'per_page' => $devices->perPage(),
+                    'total' => $devices->total(),
+                ],
+                'links' => [
+                    'next' => $devices->nextPageUrl(),
+                    'prev' => $devices->previousPageUrl(),
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching devices: ' . $e->getMessage());
+    
+            return response()->json([
+                'message' => 'Error fetching devices',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
+    
     public function show($id)
     {
         $log = Device::find($id);
