@@ -27,14 +27,15 @@ class MediaController extends Controller
         try {
             $validated = $request->validated();
     
-            // ربط المفتاحين مع الأعمدة المناسبة في الجدول
+            // ربط المفاتيح
             $validated['stars_idstars'] = $validated['star'] ?? null;
             $validated['services_idservices'] = $validated['service'] ?? null;
     
-            // رفع الملف وتخزينه في public/media
             if ($request->hasFile('med_content')) {
                 $file = $request->file('med_content');
-                $filename = time() . '_' . $file->getClientOriginalName();
+                $originalName = $file->getClientOriginalName();
+                $extension = strtolower($file->getClientOriginalExtension());
+                $filename = time() . '_' . $originalName;
     
                 $destinationPath = public_path('media');
                 if (!file_exists($destinationPath)) {
@@ -42,9 +43,19 @@ class MediaController extends Controller
                 }
     
                 $file->move($destinationPath, $filename);
+                $filePath = 'media/' . $filename;
     
-                // Use the new media route
-                $validated['med_content'] = url('media/' . $filename);
+                if ($extension === 'txt') {
+                    // قراءة محتوى الملف النصي
+                    $fullPath = public_path($filePath);
+                    $fileContent = file_get_contents($fullPath);
+    
+                    // تخزين المحتوى النصي بدلاً من الرابط
+                    $validated['med_content'] = $fileContent;
+                } else {
+                    // تخزين رابط الملف (للصور أو غيرها)
+                    $validated['med_content'] = url($filePath);
+                }
             }
     
             $media = Media::create($validated);
@@ -55,11 +66,13 @@ class MediaController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+    
             return response()->json([
                 'message' => 'Error creating media',
                 'error' => $e->getMessage()
             ], 500);
-        }}
+        }
+    }
     
     public function show($id)
     {
@@ -68,67 +81,74 @@ class MediaController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        try {
-            $media = Media::findOrFail($id);
-    
-            // Validate the request
-            $validated = $request->validate([
-                'med_name' => 'sometimes|string|max:255',
-                'med_type' => 'sometimes|integer|max:255',
-                'med_content' => 'sometimes|file',
-                'places_idplaces' => 'sometimes|integer|exists:places,idplaces',
-                'cities_idcities' => 'sometimes|integer|exists:cities,idcities',
-                'categories_idcategories' => 'sometimes|integer|exists:categories,idcategories',
-                'languages_idlanguages' => 'sometimes|integer|exists:languages,idlanguages'
-            ]);
-    
-            // Handle file upload if provided
-            if ($request->hasFile('med_content')) {
-                // حذف الملف القديم إذا موجود
-                if ($media->med_content) {
-                    $oldFilename = basename($media->med_content);
-                    $oldPath = public_path('media/' . $oldFilename);
-                    if (file_exists($oldPath)) {
-                        unlink($oldPath);
-                    }
+{
+    try {
+        $media = Media::findOrFail($id);
+
+        $validated = $request->validate([
+            'med_name' => 'sometimes|string|max:255',
+            'med_type' => 'sometimes|integer|max:255',
+            'med_content' => 'sometimes|file',
+            'places_idplaces' => 'sometimes|integer|exists:places,idplaces',
+            'cities_idcities' => 'sometimes|integer|exists:cities,idcities',
+            'categories_idcategories' => 'sometimes|integer|exists:categories,idcategories',
+            'languages_idlanguages' => 'sometimes|integer|exists:languages,idlanguages'
+        ]);
+
+        if ($request->hasFile('med_content')) {
+            // حذف الملف القديم إن كان عبارة عن رابط إلى ملف
+            if ($media->med_content && filter_var($media->med_content, FILTER_VALIDATE_URL)) {
+                $oldFilename = basename($media->med_content);
+                $oldPath = public_path('media/' . $oldFilename);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
                 }
-    
-                $file = $request->file('med_content');
-                $extension = $file->getClientOriginalExtension();
-                $filename = time() . '_' . Str::random(10) . '.' . $extension;
-    
-                $destinationPath = public_path('media');
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0775, true);
-                }
-    
-                $file->move($destinationPath, $filename);
-    
-                // Use the new media route
-                $validated['med_content'] = url('media/' . $filename);
-            } else {
-                unset($validated['med_content']);
             }
-    
-            unset($validated['star'], $validated['service']);
-    
-            $media->update($validated);
-    
-            return new MediaResource($media);
-    
-        } catch (\Exception $e) {
-            \Log::error('Error updating media', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-    
-            return response()->json([
-                'message' => 'Error updating media',
-                'error' => $e->getMessage()
-            ], 500);
+
+            $file = $request->file('med_content');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $filename = time() . '_' . Str::random(10) . '.' . $extension;
+
+            $destinationPath = public_path('media');
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0775, true);
+            }
+
+            $file->move($destinationPath, $filename);
+            $filePath = 'media/' . $filename;
+
+            // التعامل مع الملفات النصية
+            if ($extension === 'txt') {
+                $fullPath = public_path($filePath);
+                $fileContent = file_get_contents($fullPath);
+                $validated['med_content'] = $fileContent;
+            } else {
+                $validated['med_content'] = url($filePath);
+            }
+        } else {
+            unset($validated['med_content']);
         }
+
+        // إزالة المفاتيح غير المستخدمة
+        unset($validated['star'], $validated['service']);
+
+        $media->update($validated);
+
+        return new MediaResource($media);
+
+    } catch (\Exception $e) {
+        \Log::error('Error updating media', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'message' => 'Error updating media',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
    
     public function destroy($id)
     {
