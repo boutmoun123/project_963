@@ -43,7 +43,7 @@ class MediaController extends Controller
                 }
     
                 $file->move($destinationPath, $filename);
-                $filePath = 'media/' . $filename;
+                $filePath = 'api/media/' . $filename;
     
                 // خزّن الرابط دائماً، حتى لو كان txt
                 $validated['med_content'] = url($filePath);
@@ -111,7 +111,7 @@ class MediaController extends Controller
                 $file->move($destinationPath, $filename);
     
                 // Use the new media route
-                $validated['med_content'] = url('media/' . $filename);
+                $validated['med_content'] = url('api/media/' . $filename);
             } else {
                 unset($validated['med_content']);
             }
